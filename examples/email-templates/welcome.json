@@ -1,0 +1,144 @@
+{
+  "name": "Email de Bienvenida",
+  "type": "email",
+  "description": "Email de bienvenida para nuevos usuarios",
+  "elements": [
+    {
+      "id": "header-image",
+      "type": "image",
+      "properties": {
+        "src": "https://example.com/header.jpg",
+        "alt": "Welcome Header",
+        "size": {
+          "width": 600,
+          "height": 200
+        },
+        "textAlign": "center"
+      }
+    },
+    {
+      "id": "greeting-text",
+      "type": "text",
+      "properties": {
+        "content": "¡Hola {{nombre}}!",
+        "fontSize": 24,
+        "fontWeight": "bold",
+        "color": "#333333",
+        "textAlign": "center",
+        "padding": {
+          "top": 30,
+          "right": 20,
+          "bottom": 10,
+          "left": 20
+        }
+      }
+    },
+    {
+      "id": "welcome-message",
+      "type": "text",
+      "properties": {
+        "content": "Bienvenido a Universal Template Builder. Estamos emocionados de tenerte con nosotros.",
+        "fontSize": 16,
+        "color": "#666666",
+        "textAlign": "center",
+        "lineHeight": 1.6,
+        "padding": {
+          "top": 10,
+          "right": 40,
+          "bottom": 10,
+          "left": 40
+        }
+      }
+    },
+    {
+      "id": "description",
+      "type": "text",
+      "properties": {
+        "content": "Con nuestra plataforma podrás crear plantillas profesionales de PDF y Email de forma visual y sencilla.",
+        "fontSize": 14,
+        "color": "#888888",
+        "textAlign": "center",
+        "lineHeight": 1.5,
+        "padding": {
+          "top": 10,
+          "right": 40,
+          "bottom": 20,
+          "left": 40
+        }
+      }
+    },
+    {
+      "id": "cta-button",
+      "type": "button",
+      "properties": {
+        "text": "Comenzar Ahora",
+        "href": "https://example.com/dashboard",
+        "backgroundColor": "#007bff",
+        "textColor": "#ffffff",
+        "fontSize": 16,
+        "fontWeight": "bold",
+        "padding": {
+          "top": 14,
+          "right": 32,
+          "bottom": 14,
+          "left": 32
+        },
+        "borderRadius": 6
+      }
+    },
+    {
+      "id": "hr-divider",
+      "type": "hr",
+      "properties": {
+        "strokeColor": "#e0e0e0",
+        "strokeWidth": 1
+      }
+    },
+    {
+      "id": "footer-text",
+      "type": "text",
+      "properties": {
+        "content": "Si tienes alguna pregunta, no dudes en contactarnos.",
+        "fontSize": 12,
+        "color": "#999999",
+        "textAlign": "center",
+        "padding": {
+          "top": 20,
+          "right": 20,
+          "bottom": 10,
+          "left": 20
+        }
+      }
+    },
+    {
+      "id": "footer-links",
+      "type": "text",
+      "properties": {
+        "content": "<a href='https://example.com'>Sitio Web</a> | <a href='https://example.com/help'>Ayuda</a> | <a href='https://example.com/unsubscribe'>Cancelar suscripción</a>",
+        "fontSize": 11,
+        "color": "#666666",
+        "textAlign": "center",
+        "padding": {
+          "top": 10,
+          "right": 20,
+          "bottom": 20,
+          "left": 20
+        }
+      }
+    }
+  ],
+  "variables": [
+    {
+      "id": "nombre",
+      "name": "nombre",
+      "type": "string",
+      "defaultValue": "Usuario",
+      "required": true
+    }
+  ],
+  "metadata": {
+    "author": "Template Builder",
+    "version": "1.0",
+    "category": "Marketing"
+  }
+}
