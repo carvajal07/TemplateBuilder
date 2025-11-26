@@ -43,6 +43,7 @@ import {
 import { useTemplates, useCreateTemplate, useDeleteTemplate, useDuplicateTemplate } from './hooks/useTemplates';
 import { useAuth } from './hooks/useAuth';
 import { TemplateType } from './types';
+import EditorLayout from './components/Editor/EditorLayout';
 
 // ============================================================================
 // TEMPLATES PAGE
@@ -294,31 +295,7 @@ const TemplatesPage = () => {
 // ============================================================================
 
 const EditorPage = () => {
-  return (
-    <Container maxWidth="xl" sx={{ py: 4 }}>
-      <Paper elevation={3} sx={{ p: 4, minHeight: '80vh' }}>
-        <Typography variant="h3" gutterBottom color="primary">
-          🎨 Editor de Plantillas
-        </Typography>
-        <Typography variant="body1" paragraph>
-          Canvas, Toolbox, Panel de Propiedades y Árbol de Capas se renderizarán aquí.
-        </Typography>
-        <Box sx={{ mt: 4, p: 3, bgcolor: 'grey.100', borderRadius: 2 }}>
-          <Typography variant="h6" gutterBottom>
-            Funcionalidades del Editor:
-          </Typography>
-          <ul>
-            <li>Drag & Drop de elementos</li>
-            <li>Canvas interactivo con zoom</li>
-            <li>Panel de propiedades dinámico</li>
-            <li>Árbol de capas jerárquico</li>
-            <li>Undo/Redo ilimitado</li>
-            <li>Colaboración en tiempo real</li>
-          </ul>
-        </Box>
-      </Paper>
-    </Container>
-  );
+  return <EditorLayout />;
 };
 
 // ============================================================================
