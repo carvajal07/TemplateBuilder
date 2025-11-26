@@ -172,8 +172,9 @@ const TOOLBOX_CATEGORIES = {
 const Toolbox: React.FC = () => {
   const { addElement } = useEditorStore();
   const [expanded, setExpanded] = useState<string>('text');
+  const [draggedItem, setDraggedItem] = useState<ToolboxItemData | null>(null);
 
-  const handleAddElement = (item: ToolboxItemData) => {
+  const handleAddElement = (item: ToolboxItemData, position?: { x: number; y: number }) => {
     const newElement = {
       id: `element-${Date.now()}`,
       type: item.type,
@@ -181,7 +182,7 @@ const Toolbox: React.FC = () => {
         id: `element-${Date.now()}`,
         type: item.type,
         name: item.label,
-        position: { x: 100, y: 100 },
+        position: position || { x: 100, y: 100 },
         size: { width: 200, height: 100 },
         opacity: 1,
         visible: true,
@@ -192,6 +193,16 @@ const Toolbox: React.FC = () => {
     };
 
     addElement(newElement);
+  };
+
+  const handleDragStart = (e: React.DragEvent, item: ToolboxItemData) => {
+    setDraggedItem(item);
+    e.dataTransfer.effectAllowed = 'copy';
+    e.dataTransfer.setData('application/json', JSON.stringify(item));
+  };
+
+  const handleDragEnd = () => {
+    setDraggedItem(null);
   };
 
   return (
@@ -223,16 +234,20 @@ const Toolbox: React.FC = () => {
             <Grid container spacing={1}>
               {category.items.map((item) => (
                 <Grid item xs={6} key={item.type}>
-                  <Tooltip title={`Agregar ${item.label}`} arrow>
+                  <Tooltip title={`Arrastra al canvas o haz click para agregar ${item.label}`} arrow>
                     <Paper
                       elevation={0}
+                      draggable
+                      onDragStart={(e) => handleDragStart(e, item)}
+                      onDragEnd={handleDragEnd}
                       sx={{
                         p: 2,
                         textAlign: 'center',
-                        cursor: 'pointer',
+                        cursor: draggedItem?.type === item.type ? 'grabbing' : 'grab',
                         border: '1px solid',
                         borderColor: 'divider',
                         transition: 'all 0.2s',
+                        opacity: draggedItem?.type === item.type ? 0.5 : 1,
                         '&:hover': {
                           borderColor: 'primary.main',
                           bgcolor: 'action.hover',
@@ -259,7 +274,7 @@ const Toolbox: React.FC = () => {
 
       <Box sx={{ mt: 3, p: 2, bgcolor: 'info.light', borderRadius: 1 }}>
         <Typography variant="caption" display="block">
-          💡 <strong>Tip:</strong> Haz click en cualquier elemento para agregarlo al canvas.
+          💡 <strong>Tip:</strong> Arrastra cualquier elemento al canvas o haz click para agregarlo en el centro.
         </Typography>
       </Box>
     </Box>

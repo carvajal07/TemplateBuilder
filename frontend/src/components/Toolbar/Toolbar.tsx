@@ -20,6 +20,7 @@ import {
   Redo,
   Save,
   FileDownload,
+  FileUpload,
   Visibility,
   ContentCopy,
   Delete,
@@ -37,8 +38,10 @@ import { toast } from 'react-toastify';
 
 const Toolbar: React.FC = () => {
   const navigate = useNavigate();
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const {
+    elements,
     selectedIds,
     templateName,
     history,
@@ -52,6 +55,7 @@ const Toolbar: React.FC = () => {
     alignTop,
     alignMiddle,
     alignBottom,
+    addElement,
   } = useEditorStore();
 
   const hasSelection = selectedIds.length > 0;
@@ -63,7 +67,130 @@ const Toolbar: React.FC = () => {
   };
 
   const handleExport = () => {
-    toast.info('Exportando plantilla... (demo)');
+    // Convertir elementos a XML
+    const xml = convertElementsToXML(elements);
+    const blob = new Blob([xml], { type: 'application/xml' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${templateName || 'template'}.xml`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success('Plantilla exportada exitosamente');
+  };
+
+  const handleImport = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!file.name.endsWith('.xml')) {
+      toast.error('Por favor selecciona un archivo XML');
+      return;
+    }
+
+    try {
+      const text = await file.text();
+      const parser = new DOMParser();
+      const xmlDoc = parser.parseFromString(text, 'text/xml');
+
+      const parserError = xmlDoc.getElementsByTagName('parsererror');
+      if (parserError.length > 0) {
+        throw new Error('Error al parsear el XML');
+      }
+
+      const elementsFromXML = parseXMLToElements(xmlDoc);
+
+      elementsFromXML.forEach((element) => {
+        addElement(element);
+      });
+
+      toast.success(`${elementsFromXML.length} elemento(s) importado(s)`);
+    } catch (error) {
+      console.error('Error importing XML:', error);
+      toast.error('Error al importar el archivo XML');
+    }
+
+    // Reset input
+    if (event.target) {
+      event.target.value = '';
+    }
+  };
+
+  const convertElementsToXML = (elements: any[]): string => {
+    let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
+    xml += '<template>\n';
+    xml += '  <elements>\n';
+
+    elements.forEach((element) => {
+      xml += `    <element type="${element.type}" id="${element.id}">\n`;
+      xml += `      <properties>\n`;
+
+      Object.entries(element.properties).forEach(([key, value]) => {
+        if (typeof value === 'object' && value !== null) {
+          xml += `        <${key}>${JSON.stringify(value)}</${key}>\n`;
+        } else {
+          xml += `        <${key}>${value}</${key}>\n`;
+        }
+      });
+
+      xml += `      </properties>\n`;
+      xml += `    </element>\n`;
+    });
+
+    xml += '  </elements>\n';
+    xml += '</template>';
+
+    return xml;
+  };
+
+  const parseXMLToElements = (xmlDoc: Document): any[] => {
+    const elements: any[] = [];
+    const elementNodes = xmlDoc.getElementsByTagName('element');
+
+    for (let i = 0; i < elementNodes.length; i++) {
+      const elementNode = elementNodes[i];
+      const type = elementNode.getAttribute('type');
+      const id = elementNode.getAttribute('id') || `element-${Date.now()}-${i}`;
+
+      const propertiesNode = elementNode.getElementsByTagName('properties')[0];
+      const properties: any = {
+        id,
+        type,
+        name: '',
+        position: { x: 100, y: 100 },
+        size: { width: 200, height: 100 },
+        opacity: 1,
+        visible: true,
+        locked: false,
+        zIndex: 1,
+      };
+
+      if (propertiesNode) {
+        for (let j = 0; j < propertiesNode.children.length; j++) {
+          const prop = propertiesNode.children[j];
+          const key = prop.tagName;
+          const value = prop.textContent;
+
+          try {
+            properties[key] = JSON.parse(value || '');
+          } catch {
+            properties[key] = value;
+          }
+        }
+      }
+
+      elements.push({
+        id,
+        type,
+        properties,
+      });
+    }
+
+    return elements;
   };
 
   const handlePreview = () => {
@@ -237,6 +364,23 @@ const Toolbar: React.FC = () => {
           variant="outlined"
         >
           Vista Previa
+        </Button>
+
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".xml"
+          style={{ display: 'none' }}
+          onChange={handleFileChange}
+        />
+
+        <Button
+          startIcon={<FileUpload />}
+          onClick={handleImport}
+          size="small"
+          variant="outlined"
+        >
+          Importar
         </Button>
 
         <Button
