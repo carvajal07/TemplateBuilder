@@ -1,0 +1,296 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  EJEMPLO: Plantilla de Factura PDF
+
+  Esta plantilla demuestra:
+  - Uso de variables dinámicas
+  - Tablas con datos
+  - Imágenes (logo)
+  - Código QR
+  - Estilos de texto
+-->
+<WorkFlow>
+  <Layout>
+    <Id>InvoiceLayout</Id>
+    <Name>Factura</Name>
+    <Layout>
+
+      <!-- ==================== VARIABLES ==================== -->
+
+      <Variable>
+        <Id>1</Id>
+        <Name>empresa_nombre</Name>
+        <ParentId>Def.Data</ParentId>
+        <IndexInParent>0</IndexInParent>
+      </Variable>
+
+      <Variable>
+        <Id>2</Id>
+        <Name>cliente_nombre</Name>
+        <ParentId>Def.Data</ParentId>
+        <IndexInParent>1</IndexInParent>
+      </Variable>
+
+      <Variable>
+        <Id>3</Id>
+        <Name>factura_numero</Name>
+        <ParentId>Def.Data</ParentId>
+        <IndexInParent>2</IndexInParent>
+      </Variable>
+
+      <Variable>
+        <Id>4</Id>
+        <Name>fecha</Name>
+        <ParentId>Def.Data</ParentId>
+        <IndexInParent>3</IndexInParent>
+      </Variable>
+
+      <Variable>
+        <Id>5</Id>
+        <Name>total</Name>
+        <ParentId>Def.Data</ParentId>
+        <IndexInParent>4</IndexInParent>
+      </Variable>
+
+      <!-- ==================== PAGE ==================== -->
+
+      <Page>
+        <Id>100</Id>
+        <Name>Factura</Name>
+        <ParentId>Def.Pages</ParentId>
+        <IndexInParent>0</IndexInParent>
+      </Page>
+
+      <Page>
+        <Id>100</Id>
+        <ConditionType>Simple</ConditionType>
+        <Width>0.21</Width>
+        <Height>0.297</Height>
+        <NextPageId/>
+      </Page>
+
+      <!-- ==================== LOGO ==================== -->
+
+      <ImageObject>
+        <Id>200</Id>
+        <Name>Logo</Name>
+        <ParentId>100</ParentId>
+        <IndexInParent>0</IndexInParent>
+      </ImageObject>
+
+      <ImageObject>
+        <Id>200</Id>
+        <Pos X="0.02" Y="0.02"/>
+        <Size X="0.05" Y="0.03"/>
+        <ImageId>201</ImageId>
+      </ImageObject>
+
+      <Image>
+        <Id>201</Id>
+        <Name>CompanyLogo</Name>
+        <ParentId>Def.ImagesGroup</ParentId>
+        <IndexInParent>0</IndexInParent>
+      </Image>
+
+      <Image>
+        <Id>201</Id>
+        <ImageType>Simple</ImageType>
+        <ImageLocation>./logo.png</ImageLocation>
+      </Image>
+
+      <!-- ==================== TÍTULO ==================== -->
+
+      <FlowArea>
+        <Id>300</Id>
+        <Name>Titulo</Name>
+        <ParentId>100</ParentId>
+        <IndexInParent>1</IndexInParent>
+      </FlowArea>
+
+      <FlowArea>
+        <Id>300</Id>
+        <Pos X="0.02" Y="0.06"/>
+        <Size X="0.17" Y="0.02"/>
+        <FlowId>301</FlowId>
+      </FlowArea>
+
+      <Flow>
+        <Id>301</Id>
+        <Name>TituloFlow</Name>
+        <ParentId>Def.FlowGroup</ParentId>
+        <IndexInParent>0</IndexInParent>
+      </Flow>
+
+      <Flow>
+        <Id>301</Id>
+        <Type>Simple</Type>
+        <FlowContent>
+          <P Id="Def.ParaStyle">
+            <T Id="TitleStyle">FACTURA</T>
+          </P>
+        </FlowContent>
+      </Flow>
+
+      <!-- ==================== NÚMERO DE FACTURA ==================== -->
+
+      <FlowArea>
+        <Id>400</Id>
+        <Name>NumeroFactura</Name>
+        <ParentId>100</ParentId>
+        <IndexInParent>2</IndexInParent>
+      </FlowArea>
+
+      <FlowArea>
+        <Id>400</Id>
+        <Pos X="0.02" Y="0.09"/>
+        <Size X="0.17" Y="0.015"/>
+        <FlowId>401</FlowId>
+      </FlowArea>
+
+      <Flow>
+        <Id>401</Id>
+        <Type>Simple</Type>
+        <FlowContent>
+          <P Id="Def.ParaStyle">
+            <T Id="NormalStyle">Factura Nº: </T>
+            <T Id="BoldStyle"><O Id="3"/></T>
+          </P>
+        </FlowContent>
+      </Flow>
+
+      <!-- ==================== FECHA ==================== -->
+
+      <FlowArea>
+        <Id>500</Id>
+        <Name>Fecha</Name>
+        <ParentId>100</ParentId>
+        <IndexInParent>3</IndexInParent>
+      </FlowArea>
+
+      <FlowArea>
+        <Id>500</Id>
+        <Pos X="0.02" Y="0.11"/>
+        <Size X="0.17" Y="0.015"/>
+        <FlowId>501</FlowId>
+      </FlowArea>
+
+      <Flow>
+        <Id>501</Id>
+        <Type>Simple</Type>
+        <FlowContent>
+          <P Id="Def.ParaStyle">
+            <T Id="NormalStyle">Fecha: </T>
+            <T Id="NormalStyle"><O Id="4"/></T>
+          </P>
+        </FlowContent>
+      </Flow>
+
+      <!-- ==================== CLIENTE ==================== -->
+
+      <FlowArea>
+        <Id>600</Id>
+        <Name>Cliente</Name>
+        <ParentId>100</ParentId>
+        <IndexInParent>4</IndexInParent>
+      </FlowArea>
+
+      <FlowArea>
+        <Id>600</Id>
+        <Pos X="0.02" Y="0.14"/>
+        <Size X="0.17" Y="0.03"/>
+        <FlowId>601</FlowId>
+      </FlowArea>
+
+      <Flow>
+        <Id>601</Id>
+        <Type>Simple</Type>
+        <FlowContent>
+          <P Id="Def.ParaStyle">
+            <T Id="BoldStyle">Cliente:</T>
+          </P>
+          <P Id="Def.ParaStyle">
+            <T Id="NormalStyle"><O Id="2"/></T>
+          </P>
+        </FlowContent>
+      </Flow>
+
+      <!-- ==================== CÓDIGO QR ==================== -->
+
+      <Barcode>
+        <Id>700</Id>
+        <Name>QRCode</Name>
+        <ParentId>100</ParentId>
+        <IndexInParent>5</IndexInParent>
+      </Barcode>
+
+      <Barcode>
+        <Id>700</Id>
+        <Pos X="0.16" Y="0.02"/>
+        <Size X="0.03" Y="0.03"/>
+        <VariableId>3</VariableId>
+        <FillStyleId>Def.BlackFill</FillStyleId>
+        <BarcodeGenerator>
+          <Type>QR</Type>
+          <ErrorLevel>M</ErrorLevel>
+          <ModulWidth>0.001</ModulWidth>
+          <ModulSize>0.001</ModulSize>
+          <Height>0.03</Height>
+        </BarcodeGenerator>
+      </Barcode>
+
+      <!-- ==================== ESTILOS ==================== -->
+
+      <Font>
+        <Id Name="DefaultFont">Def.Font</Id>
+        <Name>Helvetica</Name>
+        <FontName>Helvetica</FontName>
+        <SubFont Name="Regular">
+          <FontLocation>Helvetica</FontLocation>
+        </SubFont>
+        <SubFont Name="Bold">
+          <FontLocation>Helvetica-Bold</FontLocation>
+        </SubFont>
+      </Font>
+
+      <Color>
+        <Id Name="Black">Def.Color</Id>
+        <RGB>0,0,0</RGB>
+      </Color>
+
+      <TextStyle>
+        <Id Name="TitleStyle">TitleStyle</Id>
+        <FontSize>0.008</FontSize>
+        <FillStyleId>Def.BlackFill</FillStyleId>
+        <FontId>Def.Font</FontId>
+        <SubFont>Bold</SubFont>
+      </TextStyle>
+
+      <TextStyle>
+        <Id Name="NormalStyle">NormalStyle</Id>
+        <FontSize>0.004</FontSize>
+        <FillStyleId>Def.BlackFill</FillStyleId>
+        <FontId>Def.Font</FontId>
+        <SubFont>Regular</SubFont>
+      </TextStyle>
+
+      <TextStyle>
+        <Id Name="BoldStyle">BoldStyle</Id>
+        <FontSize>0.004</FontSize>
+        <FillStyleId>Def.BlackFill</FillStyleId>
+        <FontId>Def.Font</FontId>
+        <SubFont>Bold</SubFont>
+      </TextStyle>
+
+      <ParaStyle>
+        <Id Name="Normal">Def.ParaStyle</Id>
+        <LeftIndent>0</LeftIndent>
+        <RightIndent>0</RightIndent>
+        <SpaceBefore>0</SpaceBefore>
+        <SpaceAfter>0</SpaceAfter>
+        <LineSpacing>1.2</LineSpacing>
+        <HAlign>Left</HAlign>
+      </ParaStyle>
+
+    </Layout>
+  </Layout>
+</WorkFlow>
