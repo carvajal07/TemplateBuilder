@@ -34,7 +34,55 @@ const EditorCanvas: React.FC = () => {
     zoomIn,
     zoomOut,
     zoomToFit,
+    addElement,
   } = useEditorStore();
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'copy';
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+
+    try {
+      const data = e.dataTransfer.getData('application/json');
+      if (!data) return;
+
+      const item = JSON.parse(data);
+      const canvas = fabricCanvasRef.current;
+      if (!canvas) return;
+
+      // Calcular posición relativa al canvas
+      const rect = canvasRef.current?.getBoundingClientRect();
+      if (!rect) return;
+
+      const x = (e.clientX - rect.left) / zoom;
+      const y = (e.clientY - rect.top) / zoom;
+
+      // Crear nuevo elemento en la posición del drop
+      const newElement = {
+        id: `element-${Date.now()}`,
+        type: item.type,
+        properties: {
+          id: `element-${Date.now()}`,
+          type: item.type,
+          name: item.label,
+          position: { x, y },
+          size: { width: 200, height: 100 },
+          opacity: 1,
+          visible: true,
+          locked: false,
+          zIndex: 1,
+          ...item.defaultProps,
+        },
+      };
+
+      addElement(newElement);
+    } catch (error) {
+      console.error('Error al soltar elemento:', error);
+    }
+  };
 
   // Inicializar Fabric.js
   useEffect(() => {
@@ -117,31 +165,133 @@ const EditorCanvas: React.FC = () => {
     }
   }, [zoom]);
 
-  // Renderizar elementos desde el store
+  // Sincronizar elementos del store con el canvas
   useEffect(() => {
     const canvas = fabricCanvasRef.current;
     if (!canvas) return;
 
-    // Clear canvas
-    canvas.clear();
-    canvas.backgroundColor = '#ffffff';
+    // Obtener objetos actuales en el canvas (excluyendo grid)
+    const currentObjects = canvas.getObjects().filter((obj: any) => obj.id);
+    const currentIds = new Set(currentObjects.map((obj: any) => obj.id));
+    const storeIds = new Set(elements.map(el => el.id));
+
+    // Remover objetos que ya no están en el store
+    currentObjects.forEach((obj: any) => {
+      if (!storeIds.has(obj.id)) {
+        canvas.remove(obj);
+      }
+    });
+
+    // Agregar o actualizar objetos
+    elements.forEach((element) => {
+      const existingObj = currentObjects.find((obj: any) => obj.id === element.id);
+
+      if (!existingObj) {
+        // Agregar nuevo objeto
+        const fabricObj = createFabricObject(element);
+        if (fabricObj) {
+          (fabricObj as any).id = element.id;
+          canvas.add(fabricObj);
+        }
+      } else {
+        // Actualizar objeto existente solo si no está siendo modificado
+        if (!canvas.getActiveObject() || (canvas.getActiveObject() as any)?.id !== element.id) {
+          updateFabricObject(existingObj, element);
+        }
+      }
+    });
+
+    canvas.renderAll();
+  }, [elements]);
+
+  // Manejar cambios en el grid
+  useEffect(() => {
+    const canvas = fabricCanvasRef.current;
+    if (!canvas) return;
+
+    // Remover líneas de grid existentes
+    const objects = canvas.getObjects();
+    objects.forEach((obj: any) => {
+      if (!obj.id && !obj.selectable) {
+        canvas.remove(obj);
+      }
+    });
 
     // Agregar grid si está habilitado
     if (gridEnabled) {
       drawGrid(canvas);
     }
 
-    // Renderizar cada elemento
-    elements.forEach((element) => {
-      const fabricObj = createFabricObject(element);
-      if (fabricObj) {
-        (fabricObj as any).id = element.id;
-        canvas.add(fabricObj);
-      }
+    canvas.renderAll();
+  }, [gridEnabled]);
+
+  // Actualizar objeto existente de Fabric.js
+  const updateFabricObject = (fabricObj: fabric.Object, element: any) => {
+    const props = element.properties;
+
+    fabricObj.set({
+      left: props.position.x,
+      top: props.position.y,
+      opacity: props.opacity,
+      visible: props.visible,
+      selectable: !props.locked,
+      evented: !props.locked,
     });
 
-    canvas.renderAll();
-  }, [elements, gridEnabled]);
+    // Actualizar propiedades específicas por tipo
+    switch (element.type) {
+      case 'text':
+      case 'title':
+      case 'subtitle':
+      case 'paragraph':
+        if (fabricObj instanceof fabric.IText) {
+          fabricObj.set({
+            text: props.content || 'Texto',
+            fontSize: props.fontSize || 16,
+            fontFamily: props.fontFamily || 'Arial',
+            fill: props.color || '#000000',
+            fontWeight: props.fontWeight || 'normal',
+            fontStyle: props.fontStyle || 'normal',
+            textAlign: props.textAlign || 'left',
+          });
+        }
+        break;
+
+      case 'rectangle':
+        if (fabricObj instanceof fabric.Rect) {
+          fabricObj.set({
+            width: props.size.width,
+            height: props.size.height,
+            fill: props.fillColor || '#cccccc',
+            stroke: props.strokeColor,
+            strokeWidth: props.strokeWidth || 0,
+          });
+        }
+        break;
+
+      case 'circle':
+        if (fabricObj instanceof fabric.Circle) {
+          fabricObj.set({
+            radius: Math.min(props.size.width, props.size.height) / 2,
+            fill: props.fillColor || '#cccccc',
+            stroke: props.strokeColor,
+            strokeWidth: props.strokeWidth || 0,
+          });
+        }
+        break;
+
+      case 'line':
+        if (fabricObj instanceof fabric.Line) {
+          fabricObj.set({
+            x2: props.position.x + props.size.width,
+            y2: props.position.y + props.size.height,
+            stroke: props.strokeColor || '#000000',
+            strokeWidth: props.strokeWidth || 2,
+          });
+        }
+        break;
+    }
+  };
 
   // Crear objeto de Fabric.js desde elemento del store
   const createFabricObject = (element: any): fabric.Object | null => {
@@ -250,6 +400,8 @@ const EditorCanvas: React.FC = () => {
   return (
     <Box
       ref={containerRef}
+      onDragOver={handleDragOver}
+      onDrop={handleDrop}
       sx={{
         flex: 1,
         position: 'relative',
